@@ -5,14 +5,16 @@ It is a template to create a new member class.
 
 ### Game Session Lifecycle
 ```mermaid
-stateDiagram-v2
-    state "Waiting for connection of players" as wp
-    [*] --> wp
-    wp --> Play
-    Play --> Pause
-    Pause --> Play
-    Play --> GameOver
-    Pause --> GameOver
+flowchart TD
+    Initial
+    Wait[Wait For Palyers]
+    Playing
+    Save[Save Results]
+
+    Initial --> Wait
+    Wait --> Playing
+    Playing --> Save
+    Save -.-> Initial
 ```
 
 ## Dir structure
