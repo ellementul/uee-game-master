@@ -1,21 +1,20 @@
 const { Member } = require('@ellementul/uee-core')
 
-const outsideEvent = require('./events/outside_event')
-const yourEvent = require('./events/your_event')
+const timeEvent = require('./events/time_event')
+const yourEvent = require('./events/wait_event')
 class YourMember extends Member {
   constructor() {
     super()
+    this.players = new Set
+    this.min_players_limit = 2
 
-    this.onEvent(outsideEvent, () => this.callback()) // Subscribing on event
+    this.onEvent(timeEvent, () => this.updateTime())
     
-    this.role = "DefaultMemberRole" // The manager needs it, and manager can change it
+    this.role = "GameMaster"
   }
 
-  callback () {
-    this.send(yourEvent, {
-      state: "NewYourStateOfYourEntity" // Fill the state property in the event
-      // If we don't fill the property, this property will be random.
-    })
+  updateTime () {
+    this.send()
   }
 }
 

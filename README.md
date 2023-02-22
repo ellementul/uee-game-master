@@ -3,6 +3,18 @@
 ## Description
 It is a template to create a new member class.
 
+### Game Session Lifecycle
+```mermaid
+stateDiagram-v2
+    state "Waiting for connection of players" as wp
+    [*] --> wp
+    wp --> Play
+    Play --> Pause
+    Pause --> Play
+    Play --> GameOver
+    Pause --> GameOver
+```
+
 ## Dir structure
 ```
 ├── index.js # entrypoint of your module
