@@ -1,4 +1,4 @@
-const { Provider } = require('@ellementul/uee-core')
+const { Provider, Types } = require('@ellementul/uee-core')
 const { GameMaster } = require('./index')
 
 describe('GameMaster', () => {
@@ -61,5 +61,66 @@ describe('GameMaster', () => {
     // Check calling of the testing event
     expect(waitEventCallback).toHaveBeenCalledTimes(0)
     expect(startEventCallback).toHaveBeenCalledTimes(1)
+  });
+
+  test('asking', () => {
+
+    // Member connect to test provider
+    const provider = new Provider
+    const gameMaster = new GameMaster
+    gameMaster.setProvider(provider)
+
+    // Subscribe to testing event
+    const askEvent = require('./events/game_ask_event')
+    const askEventCallback = jest.fn()
+    provider.onEvent(askEvent, askEventCallback)
+
+    // Run the event to has to run the testing event
+    const readyEvent = require('./events/player_ready_event')
+    provider.sendEvent(readyEvent.create())
+    provider.sendEvent(readyEvent.create())
+
+    // Check calling of the testing event
+    expect(askEventCallback).toHaveBeenCalledTimes(1);
+  });
+
+  test('answer of players', () => {
+
+    // Member connect to test provider
+    const provider = new Provider
+    const gameMaster = new GameMaster
+    gameMaster.setProvider(provider)
+
+    // Subscribe to testing event
+    const askEvent = require('./events/game_ask_event')
+    const askEventCallback = jest.fn()
+    provider.onEvent(askEvent, askEventCallback)
+
+    // Players are ready
+    const onePlayerUuid = Types.UUID.Def().rand()
+    const twoPlayerUuid = Types.UUID.Def().rand()
+    const readyEvent = require('./events/player_ready_event')
+    provider.sendEvent({
+      ...readyEvent.create(),
+      uuid: onePlayerUuid
+    })
+    provider.sendEvent({
+      ...readyEvent.create(),
+      uuid: twoPlayerUuid
+    })
+
+    // Players are giving answers
+    const answerEvent = require('./events/player_answer_event')
+    provider.sendEvent({
+      ...answerEvent.create(),
+      uuid: onePlayerUuid
+    })
+    provider.sendEvent({
+      ...answerEvent.create(),
+      uuid: twoPlayerUuid
+    })
+
+    // Check calling of the testing event
+    expect(askEventCallback).toHaveBeenCalledTimes(2);
   });
 });
