@@ -123,4 +123,56 @@ describe('GameMaster', () => {
     // Check calling of the testing event
     expect(askEventCallback).toHaveBeenCalledTimes(2);
   });
+
+  test('win and lose', () => {
+
+    // Member connect to test provider
+    const provider = new Provider
+    const gameMaster = new GameMaster
+    gameMaster.setProvider(provider)
+
+    // Subscribe to testing event
+    const winEvent = require('./events/player_won_event')
+    const loseEvent = require('./events/player_lost_event')
+    const winEventCallback = jest.fn()
+    const loseEventCallback = jest.fn()
+    provider.onEvent(winEvent, winEventCallback)
+    provider.onEvent(loseEvent, loseEventCallback)
+
+    // Players are ready
+    const onePlayerUuid = Types.UUID.Def().rand()
+    const twoPlayerUuid = Types.UUID.Def().rand()
+    const readyEvent = require('./events/player_ready_event')
+    provider.sendEvent({
+      ...readyEvent.create(),
+      uuid: onePlayerUuid
+    })
+    provider.sendEvent({
+      ...readyEvent.create(),
+      uuid: twoPlayerUuid
+    })
+
+    // Players are giving answers
+    const answerEvent = require('./events/player_answer_event')
+    provider.sendEvent({
+      ...answerEvent.create(),
+      uuid: onePlayerUuid,
+      state: 25
+    })
+    provider.sendEvent({
+      ...answerEvent.create(),
+      uuid: twoPlayerUuid,
+      state: 26
+    })
+
+    // Check calling of the testing event
+    expect(winEventCallback).toHaveBeenCalledWith({
+      ...winEvent.create(),
+      uuid: onePlayerUuid
+    });
+    expect(loseEventCallback).toHaveBeenCalledWith({
+      ...loseEvent.create(),
+      uuid: twoPlayerUuid
+    });
+  });
 });

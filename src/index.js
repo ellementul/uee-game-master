@@ -6,6 +6,8 @@ const readyEvent = require('./events/player_ready_event')
 const startEvent = require('./events/game_start_event')
 const askEvent = require('./events/game_ask_event')
 const answerEvent = require('./events/player_answer_event')
+const winEvent = require('./events/player_won_event')
+const loseEvent = require('./events/player_lost_event')
 
 const WAIT = "WaitingOfPlayers"
 const PLAY = "Playing" 
@@ -64,11 +66,44 @@ class GameMaster extends Member {
   }
 
   whoWins() {
-    console.log("wins and lose")
+    
+    const winners = this.calculateWinners()
+    
+    this.players.forEach(player => {
+      if(winners.has(player))
+        this.send(winEvent, {
+          uuid: player
+        })
+      else
+        this.send(loseEvent, {
+          uuid: player
+        })
+    })
   }
 
   areAllAnswers() {
     return [...this.players].every(playerUuid => this.answers.has(playerUuid))
+  }
+
+  calculateWinners() {
+    const allNumbers = [...this.answers.values()]
+    const maxNumber = Math.max(...allNumbers)
+    const minWinNumber = Math.ceil(maxNumber / 2)
+    
+    const winPlayers = new Set
+    let winAnswer = maxNumber
+    
+    for ( let [player, answer] of this.answers) {
+      if(answer >= minWinNumber && winAnswer >= answer) {
+        if(winAnswer > answer)
+          winPlayers.clear()
+
+        winPlayers.add(player)
+        winAnswer = answer
+      }
+    }
+
+    return winPlayers
   }
 }
 
